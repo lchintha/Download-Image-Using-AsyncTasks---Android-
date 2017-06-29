@@ -10,7 +10,7 @@
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="0dp"
         android:id="@+id/url"/>
 
     <Button
@@ -53,6 +53,8 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/showimage"/>
+        android:id="@+id/showimage"
+        android:adjustViewBounds="true"
+        android:scaleType="centerCrop"/>
 
 </LinearLayout>

@@ -1,10 +1,14 @@
 package com.example.chint.asyntaskexample;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Environment;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -28,25 +32,59 @@ public class MainActivity extends AppCompatActivity {
     ProgressBar pbar;
     String url;
     ImageView img;
-    String imageURL = "https://cdn.pixabay.com/photo/2017/01/06/19/15/soap-bubble-1958650_960_720.jpg";
-    //String imageName;
+    String imageURL = "http://www.lawner.pl/wp-content/uploads/2016/01/park.jpg";
+    int STORAGE_REQUEST_CODE = 0;
+    int READ_REQUEST_CODE = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         imgurl = (EditText)findViewById(R.id.url);
         pbar = (ProgressBar)findViewById(R.id.progress);
-        //imageName = Uri.parse(imageURL).getLastPathSegment();
     }
     public void onClick(View view){
-        url = imgurl.getText().toString();
-        imgurl.setText("");
-        if(url!=null && url.length()>0) {
-            MyTask myTask = new MyTask();
-            myTask.execute(url);
+        askPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE,STORAGE_REQUEST_CODE);
+    }
+
+    private void askPermission(String permission, int requestCode){
+        if(ContextCompat.checkSelfPermission(this,permission)!= PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this, new String[]{permission}, requestCode);
+        }else{
+            //Toast.makeText(this, "Permission has already granted", Toast.LENGTH_LONG).show();
+            url = imgurl.getText().toString();
+            imgurl.setText("");
+            if(url!=null && url.length()>0) {
+                MyTask myTask = new MyTask();
+                myTask.execute(url);
+            }
+            else
+                Toast.makeText(this, "Please Enter URL", Toast.LENGTH_LONG).show();
         }
-        else
-            Toast.makeText(this, "Please Enter URL", Toast.LENGTH_LONG).show();
+    }
+    private void askPermission2(String permission, int requestCode){
+        if(ContextCompat.checkSelfPermission(this,permission)!= PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(this, new String[]{permission}, requestCode);
+        }else{
+            img = (ImageView)findViewById(R.id.showimage);
+            File sdcard = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+            File directory = new File(sdcard.getAbsolutePath());
+            File file = new File(directory, Uri.parse(imageURL).getLastPathSegment());
+            FileInputStream stream = null;
+            try {
+                stream = new FileInputStream(file);
+                Bitmap bm = BitmapFactory.decodeStream(stream);
+                img.setImageBitmap(bm);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            finally {
+                try {
+                    stream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public void onSelect(View view){
@@ -54,25 +92,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void showImage(View view){
-        img = (ImageView)findViewById(R.id.showimage);
-        File sdcard = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
-        File directory = new File(sdcard.getAbsolutePath());
-        File file = new File(directory, Uri.parse(imageURL).getLastPathSegment());
-        FileInputStream stream = null;
-        try {
-            stream = new FileInputStream(file);
-            Bitmap bm = BitmapFactory.decodeStream(stream);
-            img.setImageBitmap(bm);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        finally {
-            try {
-                stream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
+        askPermission2(Manifest.permission.READ_EXTERNAL_STORAGE,READ_REQUEST_CODE);
     }
     class MyTask extends AsyncTask<String, Integer, Boolean>{
         int progress = 0;
