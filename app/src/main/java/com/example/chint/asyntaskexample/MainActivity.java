@@ -197,6 +197,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // New change goes here....
+
+    /*  *.iml
+        .gradle
+        /local.properties
+        /.idea/workspace.xml
+        /.idea/libraries
+        /.idea/modules.xml
+        .DS_Store
+        /build
+        /captures
+        .externalNativeBuild
+    */
 }
 
 
