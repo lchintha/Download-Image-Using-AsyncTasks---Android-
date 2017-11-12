@@ -1,6 +1,7 @@
 package com.example.chint.asyntaskexample;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -94,6 +96,35 @@ public class MainActivity extends AppCompatActivity {
     public void showImage(View view){
         askPermission2(Manifest.permission.READ_EXTERNAL_STORAGE,READ_REQUEST_CODE);
     }
+
+    public void sendImage(View view) throws FileNotFoundException {
+        String fileName = Uri.parse(imageURL).getLastPathSegment();
+        File sdcard = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        File directory = new File(sdcard.getAbsolutePath());
+        File file = new File(directory, fileName);
+        FileInputStream stream = null;
+        stream = new FileInputStream(file);
+
+        //Uri image = Uri.parse("/storage/emulated/0/Pictures/park.jpg");
+        Bitmap image = BitmapFactory.decodeStream(stream);
+        //Uri image = FileProvider.getUriForFile(this, "com.example.chint.asyntaskexample", file);
+
+        Intent i = new Intent(Intent.ACTION_SEND);
+
+        //i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        //i.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+
+        i.putExtra(Intent.EXTRA_STREAM,image);
+        i.setType("image/*");
+        i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        Intent chooser = Intent.createChooser(i, "Send Image");
+        if (i.resolveActivity(getPackageManager()) != null)
+            startActivity(chooser);
+        else
+            Toast.makeText(this, "Nothing", Toast.LENGTH_SHORT).show();
+    }
+
     class MyTask extends AsyncTask<String, Integer, Boolean>{
         int progress = 0;
         int content = -1;
